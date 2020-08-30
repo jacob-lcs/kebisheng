@@ -10,7 +10,7 @@ const defaultConfig = {
   port: 8000,
   source: './posts',
   output: './_site',
-  theme: './_theme',
+  theme: '../theme',
   htmlTemplate: path.join(__dirname, '../template.html'),
   transformers: [],
   devServerConfig: {},

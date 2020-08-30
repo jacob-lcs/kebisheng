@@ -1,0 +1,10 @@
+{
+  "name": "kebisheng-example",
+  "scripts": {
+    "start": "node ../bin/bisheng start",
+    "build": "node ../bin/bisheng build --ssr",
+    "deploy": "node ../bin/bisheng gh-pages --ssr && rm -rf _site"
+  },
+  "version": "0.0.1",
+  "private": true
+}
