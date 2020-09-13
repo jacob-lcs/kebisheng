@@ -1,7 +1,7 @@
 {
   "name": "kebisheng",
   "version": "0.0.1",
-  "description": "将 markdown 文件使用 React 生成 SPA 页面",
+  "description": "使用 React 将 markdown 文件生成 SPA 页面",
   "bin": {
     "bisheng": "./bin/bisheng"
   },
@@ -41,6 +41,7 @@
       "@babel/plugin-proposal-object-rest-spread"
     ]
   },
+  "publishConfig": { "registry": "https://npm.pkg.github.com/jacob-lcs" },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jacob-lcs/kebisheng.git"
@@ -52,12 +53,12 @@
     "blog",
     "react"
   ],
-  "author": "Benjy Cui<benjytrys@gmail.com>",
+  "author": "Jacob<jacob.lcs@qq.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jacob-lcs/bisheng/issues"
+    "url": "https://github.com/jacob-lcs/kebisheng/issues"
   },
-  "homepage": "https://github.com/jacob-lcs/bisheng#readme",
+  "homepage": "https://github.com/jacob-lcs/kebisheng#readme",
   "dependencies": {
     "@babel/core": "^7.0.0",
     "@babel/plugin-proposal-class-properties": "^7.0.0",
