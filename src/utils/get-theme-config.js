@@ -11,8 +11,9 @@ function toAbsolutePath(plugin) {
 }
 
 module.exports = function getThemeConfig(configFile) {
+  // eslint-disable-next-line import/no-dynamic-require
   const customizedConfig = require(configFile);
-  const config = Object.assign({ plugins: [] }, customizedConfig);
+  const config = { plugins: [], ...customizedConfig };
   config.plugins = [pluginHighlight].concat(config.plugins.map(toAbsolutePath));
 
   return config;

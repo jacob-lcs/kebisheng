@@ -1,17 +1,16 @@
-
-
 module.exports = function stringify(node, depth = 0) {
   const indent = '  '.repeat(depth);
   if (Array.isArray(node)) {
     return `[\n${
-      node.map(item => `${indent}  ${stringify(item, depth + 1)}`).join(',\n')
+      node.map((item) => `${indent}  ${stringify(item, depth + 1)}`).join(',\n')
     }\n${indent}]`;
   }
   if (
-    typeof node === 'object' &&
-      node !== null &&
-      !(node instanceof Date)
+    typeof node === 'object'
+      && node !== null
+      && !(node instanceof Date)
   ) {
+    // eslint-disable-next-line no-underscore-dangle
     if (node.__BISHENG_EMBEDED_CODE) {
       return node.code;
     }

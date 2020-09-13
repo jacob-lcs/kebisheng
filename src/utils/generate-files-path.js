@@ -4,7 +4,7 @@ const { join } = require('path');
 const { toUriPath } = require('./escape-win-path');
 
 function hasParams(path) {
-  return path.split('/').some(snippet => snippet.startsWith(':'));
+  return path.split('/').some((snippet) => snippet.startsWith(':'));
 }
 
 function has404(filesPath) {
@@ -14,16 +14,15 @@ function has404(filesPath) {
 function flattenRoutes(routes) {
   let flattenedRoutes = [];
   (Array.isArray(routes) ? routes : [routes]).forEach((item) => {
-    const copy = Object.assign({}, item);
+    const copy = { ...item };
     if (!copy.dataPath) {
       copy.dataPath = copy.path;
     }
     flattenedRoutes.push(copy);
 
     if (item.childRoutes) {
-      const nestedRoutes = R.chain(flattenRoutes, item.childRoutes.map(child => Object.assign({}, child, {
-        path: join(item.path, child.path),
-      })));
+      const nestedRoutes = R.chain(flattenRoutes,
+        item.childRoutes.map((child) => ({ ...child, path: join(item.path, child.path) })));
       flattenedRoutes = flattenedRoutes.concat(nestedRoutes);
     }
   });
@@ -31,8 +30,10 @@ function flattenRoutes(routes) {
 }
 
 module.exports = function generateFilesPath(routes, markdown) {
-  const flattenedRoutes = flattenRoutes(routes).map(function (item) {
+  const flattenedRoutes = flattenRoutes(routes).map((item) => {
+    // eslint-disable-next-line no-param-reassign
     item.path = toUriPath(item.path);
+    // eslint-disable-next-line no-param-reassign
     item.dataPath = toUriPath(item.dataPath);
     return item;
   });
@@ -40,7 +41,7 @@ module.exports = function generateFilesPath(routes, markdown) {
   const filesPath = R.chain((item) => {
     if (hasParams(item.path)) {
       const dataPathSnippets = item.dataPath.split('/').slice(1);
-      const firstParamIndex = dataPathSnippets.findIndex(snippet => snippet.startsWith(':'));
+      const firstParamIndex = dataPathSnippets.findIndex((snippet) => snippet.startsWith(':'));
       const firstParam = dataPathSnippets[firstParamIndex];
 
       const dataSet = exist.get(markdown, dataPathSnippets.slice(0, firstParamIndex), {});
@@ -59,11 +60,11 @@ module.exports = function generateFilesPath(routes, markdown) {
       });
 
       return generateFilesPath(processedCompleteRoutes, markdown);
-    } else if (item.path.endsWith('/')) {
+    } if (item.path.endsWith('/')) {
       return [`${item.path}index.html`];
     }
     return !item.isFolder && [`${item.path}.html`];
-  }, flattenedRoutes).filter(c => c);
+  }, flattenedRoutes).filter((c) => c);
 
   return has404(filesPath) ? filesPath : filesPath.concat('/404.html');
 };

@@ -32,8 +32,10 @@ const defaultConfig = {
 };
 
 module.exports = function getBishengConfig(configFile) {
+  console.log('到这了');
+  // eslint-disable-next-line import/no-dynamic-require
   const customizedConfig = fs.existsSync(configFile) ? require(configFile) : {};
-  const config = Object.assign({}, defaultConfig, customizedConfig);
+  const config = { ...defaultConfig, ...customizedConfig };
   config.theme = resolve.sync(config.theme, { basedir: process.cwd() });
   config.transformers = config.transformers.concat({
     test: /\.md$/,
@@ -42,5 +44,6 @@ module.exports = function getBishengConfig(configFile) {
     test: test.toString(), // Hack, for we cannot send RegExp to child process
     use,
   }));
+  console.log('config', config);
   return config;
 };

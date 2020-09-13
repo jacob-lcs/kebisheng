@@ -7,8 +7,8 @@ const { escapeWinPath, toUriPath } = require('./escape-win-path');
 const sourceLoaderPath = path.join(__dirname, '..', 'loaders', 'source-loader');
 
 function ensureToBeArray(maybeArray) {
-  return Array.isArray(maybeArray) ?
-    maybeArray : [maybeArray];
+  return Array.isArray(maybeArray)
+    ? maybeArray : [maybeArray];
 }
 
 function shouldBeIgnore(filename) {
@@ -20,8 +20,8 @@ function isDirectory(filename) {
   return fs.statSync(filename).isDirectory();
 }
 
-const isValidFile = transformers => filename =>
-  transformers.some(({ test }) => eval(test).test(filename)); // eslint-disable-line no-eval
+const isValidFile = (transformers) => (filename) => transformers
+  .some(({ test }) => eval(test).test(filename)); // eslint-disable-line no-eval
 
 function findValidFiles(source, transformers) {
   return R.pipe(
@@ -30,7 +30,7 @@ function findValidFiles(source, transformers) {
     R.chain((filename) => {
       if (isDirectory(filename)) {
         const subFiles = fs.readdirSync(filename)
-          .map(subFile => path.join(filename, subFile));
+          .map((subFile) => path.join(filename, subFile));
         return findValidFiles(subFiles, transformers);
       }
       return [filename];
@@ -47,7 +47,7 @@ function getPropPath(filename, sources) {
 }
 
 function filesToTreeStructure(files, sources) {
-  const cleanedSources = sources.map(source => source.replace(/^\.?(?:\\|\/)/, ''));
+  const cleanedSources = sources.map((source) => source.replace(/^\.?(?:\\|\/)/, ''));
   const filesTree = files.reduce((subFilesTree, filename) => {
     const propLens = R.lensPath(getPropPath(filename, cleanedSources));
     return R.set(propLens, filename, subFilesTree);
@@ -83,13 +83,13 @@ function lazyLoadWrapper({
 }) {
   const { isSSR } = context;
   const loaderString = isLazyLoadWrapper ? '' : `${sourceLoaderPath}!`;
-  return `${'function () {\n' +
-    '  return new Promise(function (resolve) {\n'}${
+  return `${'function () {\n'
+    + '  return new Promise(function (resolve) {\n'}${
     isSSR ? '' : '    require.ensure([], function (require) {\n'
   }      resolve(require('${escapeWinPath(loaderString)}${escapeWinPath(filePath)}'));\n${
     isSSR ? '' : `    }, '${toUriPath(filename)}');\n`
-  }  });\n` +
-    '}';
+  }  });\n`
+    + '}';
 }
 
 function shouldLazyLoad(nodePath, nodeValue, lazyLoad) {
@@ -110,7 +110,7 @@ function stringify(params) {
   const indent = '  '.repeat(depth);
   const shouldBeLazy = shouldLazyLoad(nodePath, nodeValue, lazyLoad);
   return R.cond([
-    [n => typeof n === 'object', (obj) => {
+    [(n) => typeof n === 'object', (obj) => {
       if (shouldBeLazy) {
         const filePath = `${path.join(
           __dirname, '..', '..', 'tmp',
@@ -139,8 +139,8 @@ function stringify(params) {
       return `{\n${objectKVString}\n${indent}}`;
     }],
     [R.T, (filename) => {
-      const filePath = path.isAbsolute(filename) ?
-        filename : path.join(process.cwd(), filename);
+      const filePath = path.isAbsolute(filename)
+        ? filename : path.join(process.cwd(), filename);
       if (shouldBeLazy) {
         return lazyLoadWrapper({ filePath, filename });
       }
@@ -154,7 +154,7 @@ exports.generate = function generate(source, transformers = []) {
     return {}; // For motion.ant.design, it doesn't need source sometimes.
   }
   if (R.is(Object, source) && !Array.isArray(source)) {
-    return R.mapObjIndexed(value => generate(value, transformers), source);
+    return R.mapObjIndexed((value) => generate(value, transformers), source);
   }
   const sources = ensureToBeArray(source);
   const validFiles = findValidFiles(sources, transformers);
@@ -195,10 +195,11 @@ exports.process = (
   });
   const transformer = transformers[transformerIndex];
 
+  // eslint-disable-next-line import/no-dynamic-require
   const markdown = require(transformer.use)(filename, fileContent);
   const parsedMarkdown = plugins.reduce(
-    (markdownData, plugin) =>
-      require(plugin[0])(markdownData, plugin[1], isBuild === true),
+    // eslint-disable-next-line import/no-dynamic-require
+    (markdownData, plugin) => require(plugin[0])(markdownData, plugin[1], isBuild === true),
     markdown,
   );
   return parsedMarkdown;

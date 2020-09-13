@@ -2,6 +2,7 @@ const chain = require('ramda/src/chain');
 const toReactElement = require('jsonml-to-react-element');
 const exist = require('exist.js');
 const NProgress = require('nprogress-for-antd');
+// eslint-disable-next-line import/no-unresolved
 const NotFound = require('{{ themePath }}/template/NotFound');
 
 const themeConfig = JSON.parse('{{ themeConfig | safe }}');
@@ -16,16 +17,16 @@ function calcPropsPath(dataPath, params) {
 }
 
 function generateUtils(data, props) {
-  const plugins = data.plugins.map(pluginTupple => pluginTupple[0](pluginTupple[1], props));
-  const converters = chain(plugin => plugin.converters || [], plugins);
+  const plugins = data.plugins.map((pluginTupple) => pluginTupple[0](pluginTupple[1], props));
+  const converters = chain((plugin) => plugin.converters || [], plugins);
   const utils = {
     get: exist.get,
     toReactComponent(jsonml) {
       return toReactElement(jsonml, converters);
     },
   };
-  plugins.map(plugin => plugin.utils || {})
-    .forEach(u => Object.assign(utils, u));
+  plugins.map((plugin) => plugin.utils || {})
+    .forEach((u) => Object.assign(utils, u));
   return utils;
 }
 
@@ -35,6 +36,7 @@ async function defaultCollector(nextProps) {
 
 module.exports = function getRoutes(data) {
   function templateWrapper(template, dataPath = '') {
+    // eslint-disable-next-line import/no-dynamic-require
     const Template = require(`{{ themePath }}/template${template.replace(/^\.\/template/, '')}`);
 
     return (nextState, callback) => {
@@ -76,7 +78,8 @@ module.exports = function getRoutes(data) {
       return route.map(processRoutes);
     }
 
-    return Object.assign({}, route, {
+    return {
+      ...route,
       onEnter: () => {
         if (typeof document !== 'undefined') {
           NProgress.start();
@@ -84,7 +87,8 @@ module.exports = function getRoutes(data) {
       },
       component: undefined,
       getComponent: templateWrapper(route.component, route.dataPath || route.path),
-      indexRoute: route.indexRoute && Object.assign({}, route.indexRoute, {
+      indexRoute: route.indexRoute && ({
+        ...route.indexRoute,
         component: undefined,
         getComponent: templateWrapper(
           route.indexRoute.component,
@@ -92,7 +96,7 @@ module.exports = function getRoutes(data) {
         ),
       }),
       childRoutes: route.childRoutes && route.childRoutes.map(processRoutes),
-    });
+    };
   }
 
   const processedRoutes = processRoutes(routes);

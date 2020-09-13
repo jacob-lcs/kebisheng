@@ -6,6 +6,7 @@ const DocumentTitle = require('react-document-title');
 const { Helmet } = require('react-helmet');
 const createElement = require('../lib/utils/create-element');
 const data = require('../lib/utils/ssr-data.js');
+// eslint-disable-next-line import/no-unresolved
 const routes = require('{{ routesPath }}')(data);
 
 module.exports = function ssr(url, callback) {
@@ -19,8 +20,10 @@ module.exports = function ssr(url, callback) {
       try {
         const content = ReactDOMServer.renderToString(
           <ReactRouter.RouterContext
+            // eslint-disable-next-line react/jsx-props-no-spreading
             {...renderProps}
-            createElement={(Component, props) => createElement(Component, { ...props, helmetContext })}
+            createElement={(Component, props) => createElement(Component,
+              { ...props, helmetContext })}
           />,
         );
         const helmet = helmetContext.helmet || Helmet.renderStatic();

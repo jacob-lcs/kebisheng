@@ -23,13 +23,15 @@ class CleanUpStatsPlugin {
   }
 
   apply(compiler) {
-    compiler.hooks.afterCompile.tap('CleanUpStatsPlugin', compilation => {
+    compiler.hooks.afterCompile.tap('CleanUpStatsPlugin', (compilation) => {
       const { children, warnings } = compilation;
       if (Array.isArray(children)) {
-        compilation.children = children.filter(child => this.shouldPickStatChild(child));
+        // eslint-disable-next-line no-param-reassign
+        compilation.children = children.filter((child) => this.shouldPickStatChild(child));
       }
       if (Array.isArray(warnings)) {
-        compilation.warnings = warnings.filter(message => this.shouldPickWarning(message));
+        // eslint-disable-next-line no-param-reassign
+        compilation.warnings = warnings.filter((message) => this.shouldPickWarning(message));
       }
     });
   }

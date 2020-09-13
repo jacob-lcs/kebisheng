@@ -9,6 +9,7 @@ const ReactRouter = require('react-router');
 const history = require('history');
 const data = require('../lib/utils/data.js');
 const createElement = require('../lib/utils/create-element');
+// eslint-disable-next-line import/no-unresolved
 const routes = require('{{ routesPath }}')(data);
 
 const { pathname, search, hash } = window.location;

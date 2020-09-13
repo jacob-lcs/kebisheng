@@ -1,4 +1,3 @@
-import openBrowser from 'react-dev-utils/openBrowser';
 import getWebpackCommonConfig from './config/getWebpackCommonConfig';
 import updateWebpackConfig from './config/updateWebpackConfig';
 
@@ -88,10 +87,11 @@ exports.start = function start(program) {
     // inject style
     css: [],
   };
-  const templateData = Object.assign(
-    { root: '/', manifest },
-    bishengConfig.htmlTemplateExtraData || {},
-  );
+  const templateData = {
+    root: '/',
+    manifest,
+    ...bishengConfig.htmlTemplateExtraData || {},
+  };
   const templatePath = path.join(
     process.cwd(),
     bishengConfig.output,
@@ -118,7 +118,7 @@ exports.start = function start(program) {
   WebpackDevServer.addDevServerEntrypoints(webpackConfig, serverOptions);
   const compiler = webpack(webpackConfig);
   const server = new WebpackDevServer(compiler, serverOptions);
-  server.listen(bishengConfig.port, '0.0.0.0', () => openBrowser(`http://localhost:${bishengConfig.port}`));
+  server.listen(bishengConfig.port, '0.0.0.0');
 };
 
 const ssrTemplate = fs
@@ -142,7 +142,9 @@ function getManifest(compilation) {
     const initials = new Set();
     const { chunks } = entrypoint;
     // Walk main chunks
+    // eslint-disable-next-line no-restricted-syntax
     for (const chunk of chunks) {
+      // eslint-disable-next-line no-restricted-syntax
       for (const file of chunk.files) {
         if (!initials.has(file)) {
           initials.add(file);
@@ -206,10 +208,11 @@ exports.build = function build(program, callback) {
     }),
   );
 
-  const ssrWebpackConfig = Object.assign({}, webpackConfig);
+  const ssrWebpackConfig = { ...webpackConfig };
   const ssrPath = path.join(tmpDirPath, `ssr.${entryName}.js`);
   const routesPath = getRoutesPath(path.dirname(bishengConfig.theme), entryName);
-  fs.writeFileSync(ssrPath, nunjucks.renderString(ssrTemplate, { routesPath: escapeWinPath(routesPath) }));
+  fs.writeFileSync(ssrPath, nunjucks
+    .renderString(ssrTemplate, { routesPath: escapeWinPath(routesPath) }));
 
   ssrWebpackConfig.entry = {
     [`${entryName}-ssr`]: ssrPath,
@@ -220,15 +223,16 @@ exports.build = function build(program, callback) {
     ssrWebpackConfig.externals,
     {
       'react-document-title': 'react-document-title',
-      'react-helmet': 'react-helmet'
+      'react-helmet': 'react-helmet',
     },
-  ].filter(external => external);
-  ssrWebpackConfig.output = Object.assign({}, ssrWebpackConfig.output, {
+  ].filter((external) => external);
+  ssrWebpackConfig.output = {
+    ...ssrWebpackConfig.output,
     filename: '[name].js',
     path: tmpDirPath,
     library: 'ssr',
     libraryTarget: 'commonjs',
-  });
+  };
 
   webpack(webpackConfig, (err, stats) => {
     if (err !== null) {
@@ -237,26 +241,25 @@ exports.build = function build(program, callback) {
 
     if (stats.hasErrors()) {
       console.log(stats.toString('errors-only'));
-      return;
+      return null;
     }
     const manifest = getManifest(stats.compilation)[bishengConfig.entryName];
 
     const markdown = sourceData.generate(bishengConfig.source, bishengConfig.transformers);
-    let filesNeedCreated = generateFilesPath(themeConfig.routes, markdown).map(bishengConfig.filePathMapper);
+    let filesNeedCreated = generateFilesPath(themeConfig.routes, markdown)
+      .map(bishengConfig.filePathMapper);
     filesNeedCreated = R.unnest(filesNeedCreated);
 
     const template = fs.readFileSync(bishengConfig.htmlTemplate).toString();
 
     if (!program.ssr) {
       require('./loaders/common/boss').jobDone();
-      const templateData = Object.assign(
-        {
-          root: bishengConfig.root,
-          hash: bishengConfig.hash,
-          manifest,
-        },
-        bishengConfig.htmlTemplateExtraData || {},
-      );
+      const templateData = {
+        root: bishengConfig.root,
+        hash: bishengConfig.hash,
+        manifest,
+        ...bishengConfig.htmlTemplateExtraData || {},
+      };
       const fileContent = nunjucks.renderString(template, templateData);
       filesNeedCreated.forEach((file) => {
         const output = path.join(bishengConfig.output, file);
@@ -269,7 +272,7 @@ exports.build = function build(program, callback) {
       if (callback) {
         callback();
       }
-      return;
+      return null;
     }
 
     context.turnOnSSRFlag();
@@ -281,6 +284,7 @@ exports.build = function build(program, callback) {
 
       require('./loaders/common/boss').jobDone();
 
+      // eslint-disable-next-line import/no-dynamic-require
       const { ssr } = require(path.join(tmpDirPath, `${entryName}-ssr`));
       const fileCreatedPromises = filesNeedCreated.map((file) => {
         const output = path.join(bishengConfig.output, file);
@@ -293,16 +297,14 @@ exports.build = function build(program, callback) {
               console.error(error);
               process.exit(1);
             }
-            const templateData = Object.assign(
-              {
-                root: bishengConfig.root,
-                content,
-                hash: bishengConfig.hash,
-                manifest,
-                ...params,
-              },
-              bishengConfig.htmlTemplateExtraData || {},
-            );
+            const templateData = {
+              root: bishengConfig.root,
+              content,
+              hash: bishengConfig.hash,
+              manifest,
+              ...params,
+              ...bishengConfig.htmlTemplateExtraData || {},
+            };
             const fileContent = nunjucks.renderString(template, templateData);
             fs.writeFileSync(output, fileContent);
             console.log('Created: ', output);
@@ -316,6 +318,7 @@ exports.build = function build(program, callback) {
         }
       });
     });
+    return null;
   });
 };
 
